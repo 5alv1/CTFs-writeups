@@ -1,25 +1,25 @@
 This is a write-up for the [ptmLibrary challenge](https://training.olicyber.it/challenges#challenge-608) on training.olicyber.it.
-![Placeholder Text](https://5alv1.github.io/CTFS-WRITEUPS/assets/ptm_lib/challenge_presentation.png)
+![Placeholder Text](https://5alv1.github.io/CTFs-WRITEUPS/assets/ptm_lib/challenge_presentation.png)
 Let's first have a look at what security measures were taken:
-![Placeholder Text](https://5alv1.github.io/CTFS-WRITEUPS/assets/ptm_lib/checksec.png)
+![Placeholder Text](https://5alv1.github.io/CTFs-WRITEUPS/assets/ptm_lib/checksec.png)
 Then, here's a breakdown of the challenge itself. At first there's a menu with five options:
-![Placeholder Text](https://5alv1.github.io/CTFS-WRITEUPS/assets/ptm_lib/menu.png)
+![Placeholder Text](https://5alv1.github.io/CTFs-WRITEUPS/assets/ptm_lib/menu.png)
 The first option opens up a series of unavailable options.
-![Placeholder Text](https://5alv1.github.io/CTFS-WRITEUPS/assets/ptm_lib/invalid_first.png)
+![Placeholder Text](https://5alv1.github.io/CTFs-WRITEUPS/assets/ptm_lib/invalid_first.png)
 It's worth to note that the variable that controls the option you select is uninitialised (This will be useful later).
-![Placeholder Text](https://5alv1.github.io/CTFS-WRITEUPS/assets/ptm_lib/uninit.png)
+![Placeholder Text](https://5alv1.github.io/CTFs-WRITEUPS/assets/ptm_lib/uninit.png)
 The second options lets you download a raw webpage given an url, the path in which is download is under `tmp` and it's a random named file.
-![Placeholder Text](https://5alv1.github.io/CTFS-WRITEUPS/assets/ptm_lib/downloadPage.png)
+![Placeholder Text](https://5alv1.github.io/CTFs-WRITEUPS/assets/ptm_lib/downloadPage.png)
 It's fairly easy to see that the function calls the syscall `execvp` to call wget
-![Placeholder Text](https://5alv1.github.io/CTFS-WRITEUPS/assets/ptm_lib/execvp.png)
+![Placeholder Text](https://5alv1.github.io/CTFs-WRITEUPS/assets/ptm_lib/execvp.png)
 This function is obviously vulnerable, the `gets` function should **never be used** (believe it or not, it's written [in the actual docs](https://www.man7.org/linux/man-pages/man3/gets.3.html)) because it does not offer an option to reduce the buffer size, and it reads all possible bytes, stopping only at a new line or an EOF. The only advantage (from a developer's point of view) is that it always puts a `NULL` byte after the data it writes, so it cannot be used for any kind of leaking (you should still **NOT** use it, though).
 
 Now I have found a buffer overflow. Since the addresses are not randomised, I should be able to call the conveniently declared `printFlag` function (which just pops a shell), but I still need a way to find the canary value.
 
 ### What about the other functionalities in the program?
 I'm gonna skip to the first menu's fourth option, since the third one isn't very interesting; this makes you input your name and puts it into a global array of characters:
-![Placeholder Text](https://5alv1.github.io/CTFS-WRITEUPS/assets/ptm_lib/fgets.png)
-![Placeholder Text](https://5alv1.github.io/CTFS-WRITEUPS/assets/ptm_lib/name_glob.png)
+![Placeholder Text](https://5alv1.github.io/CTFs-WRITEUPS/assets/ptm_lib/fgets.png)
+![Placeholder Text](https://5alv1.github.io/CTFs-WRITEUPS/assets/ptm_lib/name_glob.png)
 Now why exactly is this interesting? Because there's a string with a known address which we can control!
 
 ### My first approach
