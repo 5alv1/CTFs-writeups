@@ -102,7 +102,6 @@ from pwn import *
 context.endianness = "little"
 context.arch = "amd64"
 
-i = open("input.txt", "wb")
 elf = ELF("./chall")
 
 if args.REMOTE:
