@@ -61,9 +61,13 @@ Exploring the help page of `wget` I got to an interesting point:
 -U,  --user-agent=AGENT          identify as AGENT instead of Wget/VERSION
 ```
 This potentially gives me an arbitrary read, which I could use to read out the canary, but how do I know where the canary is? The function `scanf` comes in out help here, because when it's trying to read an integer (or any sort of numeric value) it will completely leave the memory alone if you write character that are not digits (I personally always use `-`), I'm not sure if it's some kind of bug, but here's proof of what I'm saying:
-![[Pasted image 20241223021600.png]]
+
+![Placeholder Text](https://5alv1.github.io/CTFs-writeups/assets/ptm_lib/leak.png)
+
 Sweet! Now let's see if this is an address of some kind, or the canary itself!
-![[Pasted image 20241223021758.png]]
+
+![Placeholder Text](https://5alv1.github.io/CTFs-writeups/assets/ptm_lib/stack.png)
+
 Sweet! Since the stack is static, with a leak I can always calculate the address of a canary, and leak it with the arbitrary read I found earlier!
 
 ### The exploit's structure
